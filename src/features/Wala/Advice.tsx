@@ -18,9 +18,25 @@ export default function Advice(){
     const getAdvice=() => {
 
         setIsLoading(true);
-  axios
-  .get<string>("http://localhost:8000/givemeadvice")
-  .then((response) => {setIsLoading(false);setAdvice(response.data); setAdviceSet(true);console.log(response.data);});
+
+        const headers  = {
+            'api-key' : "redacted"
+          }
+          axios.post("https://transformationworkoutassistantopenai.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-10-21",
+
+            {
+              "messages": [
+                  {
+                      "role": "system",
+                      "content": "You are an AI assistant that creates a gives general advice "
+                  },
+                  {
+                      "role": "user",
+                      "content": "Give me advice "
+                  }
+              ]
+            }, {headers : headers})
+  .then((response) => {setIsLoading(false);setAdvice(response.data.choices[0].message.content); setAdviceSet(true);});
 
     }
 

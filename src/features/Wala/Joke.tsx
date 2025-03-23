@@ -16,10 +16,25 @@ export default function Joke(){
     }
     const getAJoke=() => {
 
+      const headers  = {
+        'api-key' : "redacted"
+      }
         setIsLoading(true);
-  axios
-  .get<string>("http://localhost:8000/tellmeajoke")
-  .then((response) => {setIsLoading(false);setJoke(response.data); setJokeSet(true);console.log(response.data);});
+  axios.post("https://transformationworkoutassistantopenai.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-10-21",
+
+    {
+      "messages": [
+          {
+              "role": "system",
+              "content": "You are an AI assistant that tells people jokes."
+          },
+          {
+              "role": "user",
+              "content": "Tell me a joke?"
+          }
+      ]
+  }, {headers : headers})
+  .then((response) => {setIsLoading(false);console.log(response);setJoke(response.data.choices[0].message.content); setJokeSet(true);console.log(response.data);});
 
     }
 

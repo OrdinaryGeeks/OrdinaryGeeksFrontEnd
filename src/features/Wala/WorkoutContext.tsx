@@ -20,13 +20,13 @@ export default function WorkoutContext() {
         setWorkoutSet(false);
     }
     const handleWeight = (event: any) => {
-        setWeightChecked(event.target.value);
+        setWeightChecked(event.target.checked);
     }
     const handleEndurance = (event:any) => {
-        setEnduranceChecked(event.target.value);
+        setEnduranceChecked(event.target.checked);
     }
     const handleMuscle = (event:any) => {
-        setMuscleChecked (event.target.value);
+        setMuscleChecked (event.target.checked);
     }
 
     let params = "";
@@ -36,7 +36,7 @@ export default function WorkoutContext() {
       };
 
     const handleChange = (event: any) => {
-        alert(event.target.value);
+       // alert(event.target.value);
         setWorkoutFreq(event.target.value as string);
       };
 
@@ -49,6 +49,8 @@ export default function WorkoutContext() {
     }
       const workoutFromContext = () => {
 
+        console.log(muscleChecked, weightChecked, enduranceChecked, workoutFreq, workoutLevel);
+
        setIsLoading(true);
         if(muscleChecked)
             paramsAdd("muscle=true");
@@ -59,10 +61,56 @@ export default function WorkoutContext() {
         paramsAdd("freq="+workoutFreq);
         paramsAdd("level="+workoutLevel);
 
+        let goals = "";
+
+        if(muscleChecked && enduranceChecked && weightChecked)
+            goals = "Goals are to gain muscle, endurance, and lose weight";
+        else if(muscleChecked && enduranceChecked)
+            goals = "Goals are to gain muscle and endurance";
+        else if(muscleChecked && weightChecked)
+            goals = "Goals are to gain muscle and lose weight";
+        else if (weightChecked && enduranceChecked)
+            goals= "Goals are to lose weight and gain endurance";
+        else if(weightChecked)
+            goals = "Goals are to lose weight";
+        else if(muscleChecked)
+            goals = "Goals are to gain muscle";
+        else if(enduranceChecked)
+            goals = "Goals are to gain endurance";
+
+        let frequencyString = " by working out " + workoutFreq + " days a week ";
+
+        let levelString = "";
+
+        if(workoutLevel == "Beginner")
+            levelString = " at a level suitable for a beginner";
+        if(workoutLevel == "Intermediate")
+            levelString= " at an intermediate level";
+        if(workoutLevel == "Advanced")
+            levelString = " at an advanced level";
+        if(workoutLevel == "Elite")
+            levelString = " at an elite level";
+
         
-      axios
-      .get<string>("http://localhost:8000/createworkout"+params)
-      .then((response) => {setIsLoading(false);setWorkoutSet(true);setWorkout(response.data); console.log(response.data);});
+        const headers  = {
+            'api-key' : "redacted"
+          }
+          axios.post("https://transformationworkoutassistantopenai.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-10-21",
+
+            {
+              "messages": [
+                  {
+                      "role": "system",
+                      "content": "You are an AI assistant that creates a gives weekly workout plans "
+                  },
+                  {
+                      "role": "user",
+                      "content": goals + frequencyString + levelString
+                  }
+              ]
+            }, {headers : headers})
+     
+      .then((response) => {setIsLoading(false);console.log(response.data.choices[0].message.content);setWorkout(response.data.choices[0].message.content);setWorkoutSet(true);  }).then(() => console.log(workout));
 
       }
     return(
@@ -122,7 +170,8 @@ name="fitness-level">
 }
 
 {workoutSet && !isLoading && <Button sx= {{m:2}} variant="contained" onClick={reload}>Clear Workout</Button>}
-{!isLoading && workoutSet && {workout}}
+{!isLoading && workoutSet}
+{workout}
         
         </>
     )

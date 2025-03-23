@@ -11,6 +11,7 @@ export default function Header() {
     { title: "Home", path: "/" },
     { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
+    { title: "WALA", path: "/wala"}
   ];
 /*  const brandStyle = {
     color: "inherit",
