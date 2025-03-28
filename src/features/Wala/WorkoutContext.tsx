@@ -1,6 +1,6 @@
 import {Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, FormLabel, MenuItem, Radio, RadioGroup, Select,  Typography} from '@mui/material';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function WorkoutContext() {
 
@@ -13,7 +13,63 @@ export default function WorkoutContext() {
     const [workoutSet, setWorkoutSet] = useState(false);
     
     const [isLoading, setIsLoading] = useState(false);
+    const [days, setDays] = useState<{ day: string; workoutType: string; exercises: string[] }[]>([]);
 
+
+    /* const backgroundStyle = {
+        backgroundImage: `url('https://ordinarygeeks.com/images/Workout.png')`, // Replace with your image URL
+        backgroundSize: "cover", // Ensures the image covers the entire element
+        backgroundPosition: "center", // Centers the image
+        width: "100vw", // Full width of the viewport
+        height: "100vh", // Full height of the viewport
+      }; */
+    useEffect (() => {
+
+        if(workoutSet) {
+
+        function parseWorkoutPlan(input: string): { day: string; workoutType: string; exercises: string[] }[] {
+            const workoutPlan: { day: string; workoutType: string; exercises: string[] }[] = [];
+            
+            const dayBlocks = input.split(/Day \d+:/g).filter(block => block.trim() !== ""); // Split by "Day" keyword
+            dayBlocks.forEach((block, index) => {
+              const lines = block.trim().split("\n");
+              const workoutType = lines[0].trim(); // First line is the workout type
+              const exercises = lines.slice(1).map(line => line.trim()); // Remaining lines are exercises
+              
+              workoutPlan.push({
+                day: `Day ${index + 1}`,
+                workoutType,
+                exercises,
+              });
+            });
+          
+            return workoutPlan;
+          }
+          
+          // Call the function and store workout plan
+          const workoutPlan = parseWorkoutPlan(workout);
+
+          console.log(workoutPlan);
+          setDays(workoutPlan);
+        }
+    }, [workoutSet, workout])
+
+
+    const [currentDayIndex, setCurrentDayIndex] = useState(0); // Track the current day's index
+
+    const handleNext = () => {
+      if (currentDayIndex < days.length - 1) {
+        setCurrentDayIndex(currentDayIndex + 1);
+      }
+    };
+  
+    const handlePrevious = () => {
+      if (currentDayIndex > 0) {
+        setCurrentDayIndex(currentDayIndex - 1);
+      }
+    };
+  
+    const currentDay = days[currentDayIndex]; // Get the current day's data
     const reload =() => {
 
         setIsLoading(false);
@@ -101,7 +157,7 @@ export default function WorkoutContext() {
               "messages": [
                   {
                       "role": "system",
-                      "content": "You are an AI assistant that creates a gives weekly workout plans "
+                      "content": "You are an AI assistant that creates a gives weekly workout plans. Break each day's workout down with the name of the exercise, followed by the word Sets and a -, then the number of sets, followed by the word Reps and a -, then the reps.  If the reps have a weight associated with them, precede the weight with the word Weight followed by a -.  "
                   },
                   {
                       "role": "user",
@@ -113,8 +169,10 @@ export default function WorkoutContext() {
       .then((response) => {setIsLoading(false);console.log(response.data.choices[0].message.content);setWorkout(response.data.choices[0].message.content);setWorkoutSet(true);  }).then(() => console.log(workout));
 
       }
+
+      
     return(
-        <>
+        <div >
         {isLoading && <CircularProgress/>}
         {!isLoading && !workoutSet &&
         <>
@@ -171,8 +229,30 @@ name="fitness-level">
 
 {workoutSet && !isLoading && <Button sx= {{m:2}} variant="contained" onClick={reload}>Clear Workout</Button>}
 {!isLoading && workoutSet}
-{workout}
-        
-        </>
+
+
+{workoutSet && currentDay &&
+<div>
+    
+        <h2>{currentDay.day}: {currentDay.workoutType}</h2>
+        <ul>
+          {currentDay.exercises.map((exercise, index) => (
+            <li key={index}>{exercise}</li>
+          ))}
+        </ul>
+      
+      <div>
+        <button onClick={handlePrevious} disabled={currentDayIndex === 0}>
+          Previous
+        </button>
+        <button onClick={handleNext} disabled={currentDayIndex === days.length - 1}>
+          Next
+        </button>
+      </div>
+      </div>
+}
+
+      
+        </div>
     )
 }

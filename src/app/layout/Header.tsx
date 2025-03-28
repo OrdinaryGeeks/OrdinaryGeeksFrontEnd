@@ -1,18 +1,35 @@
 import { AppBar, Toolbar } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 import { Box, List, ListItem } from "@mui/material";
-import { useAppSelector } from "../Store/configureStore";
-import SignedInMenu from "./SignedInMenu";
+//import { useAppSelector } from "../Store/configureStore";
+//import SignedInMenu from "./SignedInMenu";
 import {ImageList} from "@mui/material";
 
 export default function Header() {
-  const { user } = useAppSelector((state) => state.account);
-  const pageLinks = [
+//  const { user } = useAppSelector((state) => state.account);
+  let pageLinks = [
     { title: "Home", path: "/" },
     { title: "About", path: "/about" },
     { title: "Contact", path: "/contact" },
     { title: "WALA", path: "/wala"}
   ];
+  pageLinks  = [];
+
+  /* moved stuff was in render 
+  
+        {user ? (
+          <SignedInMenu />
+        ) : (
+          <List sx={{ display: "flex" }}>
+            {AuthLinks.map(({ title, path }) => (
+              <ListItem component={NavLink} to={path} key={path}>
+                {title.toUpperCase()}
+              </ListItem>
+            ))}
+          </List>
+        )} 
+
+        */
 /*  const brandStyle = {
     color: "inherit",
     textDecoration: "none",
@@ -25,10 +42,10 @@ export default function Header() {
     },
   };
   */
-  const AuthLinks = [
+/*  const AuthLinks = [
     { title: "Login", path: "/login" },
     { title: "Register", path: "/register" },
-  ];
+  ];*/
   return (
     <AppBar color="secondary" position="static">
       <Toolbar >
@@ -60,17 +77,9 @@ export default function Header() {
             </ListItem>
           ))}
         </List>
-        {user ? (
-          <SignedInMenu />
-        ) : (
-          <List sx={{ display: "flex" }}>
-            {AuthLinks.map(({ title, path }) => (
-              <ListItem component={NavLink} to={path} key={path}>
-                {title.toUpperCase()}
-              </ListItem>
-            ))}
-          </List>
-        )}
+      
+     
+      
       </Toolbar>
     </AppBar>
   );

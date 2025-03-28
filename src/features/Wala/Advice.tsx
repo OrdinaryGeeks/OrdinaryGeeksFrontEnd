@@ -1,6 +1,6 @@
 import { Button, CircularProgress } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Advice(){
 
@@ -8,13 +8,62 @@ export default function Advice(){
     const [isLoading, setIsLoading] = useState(false);
     const [advice, setAdvice] = useState("");
     const [adviceSet, setAdviceSet] = useState(false);
+    const [adviceArray, setAdviceArray] = useState<Advice[]>([]);
 
+    const [currentIndex, setCurrentIndex] = useState(0);
 
+    const showNextAdvice = () => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % advice.length); // Loop to the start
+    };
+  
+
+    const showPreviousAdvice = () => {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + advice.length) % advice.length); // Loop to the end
+      };
+
+    type Advice = {
+        type: string; // The advice number (e.g., "Advice 1")
+        text: string; // The actual advice content
+      };
+
+      useEffect(() => {
+      if(adviceSet){
+      const parseInput = (input: string): Advice[] => {
+        const advices: Advice[] = [];
+      
+        // Split the input into lines, removing any blank lines
+        const lines = input.split("\n").filter((line) => line.trim() !== "");
+      
+        for (const line of lines) {
+          const match = line.match(/^Advice (\d+): (.+)$/); // Match the format "Advice <number>: <text>"
+          if (match) {
+            const type = `Advice ${match[1].trim()}`; // Extract the advice number
+            const text = match[2].trim(); // Extract the advice text
+            advices.push({ type, text });
+          }
+        }
+      
+        return advices;
+
+    }
+
+    setAdviceArray(parseInput(advice));
+}
+      },[adviceSet, advice]
+
+    )
     const reload =() => {
 
         setIsLoading(false);
         setAdviceSet(false);
     }
+/*     const backgroundStyle = {
+        backgroundImage: `url('https://ordinarygeeks.com/images/Counseling.png')`, // Replace with your image URL
+        backgroundSize: "cover", // Ensures the image covers the entire element
+        backgroundPosition: "center", // Centers the image
+        width: "100vw", // Full width of the viewport
+        height: "100vh", // Full height of the viewport
+      }; */
     const getAdvice=() => {
 
         setIsLoading(true);
@@ -28,7 +77,7 @@ export default function Advice(){
               "messages": [
                   {
                       "role": "system",
-                      "content": "You are an AI assistant that creates a gives general advice "
+                      "content": "You are an AI assistant that  gives 5 pieces of advice to people who ask. The advice is separated by Advice and an index. "
                   },
                   {
                       "role": "user",
@@ -50,12 +99,25 @@ export default function Advice(){
 
                   {isLoading && <CircularProgress/>
                     }
-        {!isLoading && !adviceSet && <>
+        {!isLoading && !adviceSet &&<>
         <Button sx= {{m:2}} variant="contained" onClick={getAdvice}>Get Advice</Button>
         </>
         }
         {!isLoading && adviceSet && <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Button</Button>}
-        {advice}
+        
+        {!isLoading && adviceSet && adviceArray  && adviceArray[currentIndex] &&
+        <div>
+        <div style={{ textAlign: "center", margin: "20px" }}>
+      <h1>{adviceArray[currentIndex].type}</h1>
+      <p>{adviceArray[currentIndex].text}</p>
+      <button onClick={showPreviousAdvice} style={{ marginRight: "10px" }}>
+        Previous
+      </button>
+      <button onClick={showNextAdvice}>Next</button>
+      </div>
+    </div>
+
+    }
         </div>
     
     )

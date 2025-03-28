@@ -1,24 +1,73 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-/* interface Day{
-    breakfast:string,
-    lunch:string,
-    dinner: string
-} */
+
 export default function Diet()
 {
 
-//const [dietType, setDietType] = useState("");
 const [isLoading, setIsLoading] = useState(false);
 const [dietSet, setDietSet]=useState(false);
 const [dietString, setDietString] = useState("");
+const [days2, setDays] = useState<{ day: string; breakfast: string; lunch: string; dinner: string}[]>([]);
 
-//const [days, setDays] = useState<Day[]>([])
+useEffect(() => {
+    if(dietSet)
+    {
+        function parseMeals(input: string): { day: string; breakfast: string; lunch: string; dinner: string }[] {
+            const days: { day: string; breakfast: string; lunch: string; dinner: string }[] = [];
+        
+            const dayBlocks = input.split(/Day \d+/g).filter(block => block.trim() !== ""); // Split by "Day" keyword
+            console.log(dayBlocks);
+            dayBlocks.forEach((block, index) => {
+              const [breakfast, lunch, dinner] = block.trim().split("\n").map(line => line.split(": ")[1]);
+              console.log(breakfast, lunch, dinner);
+              days.push({
+                day: `Day ${index + 1}`,
+                breakfast,
+                lunch,
+                dinner
+              });
+            });
+        
+            return days;
+          }
+        
+        
+          alert("diet set, parseing meals");
+        
+          let whatsthis = parseMeals(dietString);
+          console.log(whatsthis);
+          setDays(whatsthis);
+    }
+}, [dietSet, dietString]);
 
 
+/* const backgroundStyle = {
+    backgroundImage: `url(${dietPic})`, // Replace with your image URL
+   backgroundSize: "200px 200px", // Stretch image to fit the container
+    backgroundPosition: "center", // Center the image
+    backgroundRepeat: "no-repeat", // Prevent image repetition
+    width: "100vw", // Full width of the viewport or container
+    height: "200px", // Full height of the viewport or container
+    
+    
+  }; */
+const [currentDayIndex, setCurrentDayIndex] = useState(0); // Track the current day's index
 
+const handleNext = () => {
+  if (currentDayIndex < days2.length - 1) {
+    setCurrentDayIndex(currentDayIndex + 1);
+  }
+};
+
+const handlePrevious = () => {
+  if (currentDayIndex > 0) {
+    setCurrentDayIndex(currentDayIndex - 1);
+  }
+};
+
+const currentDay = days2[currentDayIndex]; // Get the current day's data
 const reload =() => {
 
     setIsLoading(false);
@@ -43,7 +92,7 @@ setIsLoading(true);
       "messages": [
           {
               "role": "system",
-              "content": "You are an AI assistant that creates a 7 day breakfast/lunch/dinner meal plans according to a particular diet."
+              "content": "You are an AI assistant that creates a 7 day breakfast/lunch/dinner meal plans according to a particular diet.  When you return the diet, return each day separated by the word Day and the day of the diet it is.  For each day, return the breakfast, lunch, and dinner separated by a -."
           },
           {
               "role": "user",
@@ -53,94 +102,15 @@ setIsLoading(true);
     }, {headers : headers})
   .then((response) => {setIsLoading(false); setDietSet(true); setDietString(response.data.choices[0].message.content);})
 
-   /*
-let splitNewLines = response.data.split("\n");
 
-let tempDays :Day[] = [];
-let tempDay : Day = {breakfast:"", lunch:"", dinner:""}
-
-    for(let i = 0; i<splitNewLines.length; i++)
-    {
-        if(splitNewLines[i].includes("Day"))
-           
-        if(splitNewLines[i].includes("Breakfast"))
-            tempDay = {...tempDay, breakfast: splitNewLines[i]};
-        if(splitNewLines[i].includes("Lunch"))
-            tempDay = {...tempDay, lunch: splitNewLines[i]};
-        if(splitNewLines[i].includes("Dinner"))
-        {
-            tempDay = {...tempDay, dinner: splitNewLines[i]};
-            tempDays.push(tempDay);
-        }
-    }
-
-    setDays(tempDays);
-  });
-  */
 
 
 }
-/*
-const createDiet = () => {
-
-    const params = new URLSearchParams();
-params.append('diet', dietType);
-    
-
-setIsLoading(true);
-  axios
-  .get<string>("http://localhost:8000/helpmewithdiet?diet="+dietType)
-  .then((response) => {setIsLoading(false); setDietSet(true); console.log(response.data);
-
-   
-let splitNewLines = response.data.split("\n");
-
-let tempDays :Day[] = [];
-let tempDay : Day = {breakfast:"", lunch:"", dinner:""}
-
-    for(let i = 0; i<splitNewLines.length; i++)
-    {
-        if(splitNewLines[i].includes("Day"))
-           
-        if(splitNewLines[i].includes("Breakfast"))
-            tempDay = {...tempDay, breakfast: splitNewLines[i]};
-        if(splitNewLines[i].includes("Lunch"))
-            tempDay = {...tempDay, lunch: splitNewLines[i]};
-        if(splitNewLines[i].includes("Dinner"))
-        {
-            tempDay = {...tempDay, dinner: splitNewLines[i]};
-            tempDays.push(tempDay);
-        }
-    }
-
-    setDays(tempDays);
-  });
-
-
-}
-
-const chooseKeto = () => {
-
-    setDietType("Keto");
-}
-const chooseAtkins = () => {
-
-    setDietType("Atkins");
-}
-const chooseMediterranean = () => {
-
-    setDietType("Mediterranean");
-}
-const chooseVegan = () => {
-
-    setDietType("Vegan");
-}
-    */
     return(
 
 
 
-        <div>
+        <div >
         {isLoading && <CircularProgress/>
         }
 
@@ -162,21 +132,34 @@ const chooseVegan = () => {
 <>
         <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Options</Button>
 
-        <Typography>{dietString}</Typography>
+           
         </>
 }
        
-    </div>  
-    )
+<div>{dietSet && currentDay 
+
+&& <div>
+
+<div>
+<h2>{currentDay.day}</h2>
+<ul>
+  <li><strong>Breakfast:</strong> {currentDay.breakfast}</li>
+  <li><strong>Lunch:</strong> {currentDay.lunch}</li>
+  <li><strong>Dinner:</strong> {currentDay.dinner}</li>
+</ul>
+</div>
+<div>
+<button onClick={handlePrevious} disabled={currentDayIndex === 0}>
+  Previous
+</button>
+<button onClick={handleNext} disabled={currentDayIndex === days2.length - 1}>
+  Next
+</button>
+</div>
+</div>
+    
 }
 
-/* {days.map((day, idx) =>
-        <>
-        <div> Day {idx}</div>
-        <div>{day.breakfast}</div>
-        <div>{day.lunch}</div>
-        <div>{day.dinner}</div>
-
-        </>
-        )}
-        */
+</div>
+</div>)
+}

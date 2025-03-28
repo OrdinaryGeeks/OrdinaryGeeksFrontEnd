@@ -1,6 +1,6 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import App from "../../App";
-import HomePage from "../../features/home/HomePage";
+//import HomePage from "../../features/home/HomePage";
 import AboutPage from "../../features/about/AboutPage";
 import ContactPage from "../../features/contact/ContactPage";
 import Login from "../../features/account/Login";
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { path: "/", element: <HomePage /> },
+      { path: "/", element: <Wala /> },
       {path: "/Wala", element: <Wala/>},
       { path: "/AHS", element: <AHS /> },
       { path: "/about", element: <AboutPage /> },

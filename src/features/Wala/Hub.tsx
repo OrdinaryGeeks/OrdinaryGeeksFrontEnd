@@ -3,20 +3,23 @@ import { useState } from "react";
 
 import { Box, Card, Container } from '@mui/material';
 import Button from '@mui/material/Button';
-import { FormControl, Input,  Typography } from '@mui/material';
+import { FormControl,  Typography } from '@mui/material';
 import Joke from "./Joke";
 import Advice from "./Advice";
 import Diet from "./Diet";
 import logo from "./assets/Logos.jpg";
 import WorkoutContext from "./WorkoutContext";
-import Reset from "./Reset";
+//import Reset from "./Reset";
+import EnterDiet from "./EnterDiet";
+
 
 export default function Hub() {
   const [showEnterWorkout, setShowEnterWorkout] = useState(false);
   const [showDiet, setShowDiet] = useState(false);
   const [showJoke, setShowJoke]= useState(false);
   const [showAdvice, setShowAdvice] = useState(false);
-  const [showReset, setShowReset] = useState(false);
+  //const [showReset, setShowReset] = useState(false);
+  const [showEnterDiet, setShowEnterDiet] = useState(false);
 
 
   
@@ -26,7 +29,8 @@ const getDiet = () => {
   setShowJoke(false);
   setShowAdvice(false);
   setShowEnterWorkout(false);
-  setShowReset(false);
+ // setShowReset(false);
+  setShowEnterDiet(false);
 
 }
 
@@ -42,10 +46,12 @@ const getAJoke = () => {
   setShowDiet(false);
   
   setShowEnterWorkout(false); 
-  setShowReset(false);
+  //setShowReset(false);
+  setShowEnterDiet(false);
   
 };
 
+/*
 const resetAI= () => {
 
   
@@ -55,9 +61,10 @@ const resetAI= () => {
   
   setShowEnterWorkout(false); 
   setShowReset(true);
+  setShowEnterDiet(false);
 
 
-}
+}*/
 const getAdvice = () => {
 
  
@@ -66,7 +73,8 @@ const getAdvice = () => {
   setShowDiet(false);
   
   setShowEnterWorkout(false);
-  setShowReset(false);
+  //setShowReset(false);
+  setShowEnterDiet(false);
 
 }
 
@@ -78,7 +86,20 @@ const getEnterWorkout = () => {
   setShowDiet(false);
   
   setShowEnterWorkout(true);
-  setShowReset(false);
+  //setShowReset(false);
+  setShowEnterDiet(false);
+
+}
+const getEnterDiet = () => {
+
+
+  setShowJoke(false);
+  setShowAdvice(false);
+  setShowDiet(false);
+  
+  setShowEnterWorkout(false);
+  //setShowReset(false);
+  setShowEnterDiet(true);
 
 }
   return (
@@ -92,14 +113,14 @@ const getEnterWorkout = () => {
      
       <FormControl  className="MuiFormControl-marginDense" variant="outlined" >
       
-        <Input sx={{ border: 1, m:2}} type="text" name="question"></Input>
-        <Button onClick={resetAI} sx= {{m:2}} variant="contained" type="submit">Reset AI</Button>
+       
         <Button onClick={getDiet} sx= {{m:2}} variant="contained" type="submit">Build a Diet</Button>
        
         <Button onClick={getEnterWorkout} sx= {{m:2}} variant="contained" type="submit">Build a Workout</Button>
-        <Button onClick={getAJoke} sx= {{m:2}} variant="contained" type="submit">Tell me a Joke</Button>
+        <Button onClick={getAJoke} sx= {{m:2}} variant="contained" type="submit">Tell me Jokes</Button>
         
         <Button onClick={getAdvice} sx= {{m:2}} variant="contained" type="submit">Give me advice</Button>
+        <Button onClick={getEnterDiet} sx= {{m:2}} variant="contained" type="submit">Enter Diet</Button>
       </FormControl>
     
 </Card>
@@ -108,7 +129,8 @@ const getEnterWorkout = () => {
   {showAdvice && <Advice ></Advice>}
   {showDiet && <Diet></Diet>}
   {showEnterWorkout && <WorkoutContext></WorkoutContext>}
-  {showReset && <Reset></Reset>}
+ 
+  {showEnterDiet && <EnterDiet></EnterDiet>}
  
 </Card>
 </Container>
