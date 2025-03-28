@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,7 @@ const [isLoading, setIsLoading] = useState(false);
 const [dietSet, setDietSet]=useState(false);
 const [dietString, setDietString] = useState("");
 const [days2, setDays] = useState<{ day: string; breakfast: string; lunch: string; dinner: string}[]>([]);
-
+const [error, setError] = useState(false);
 useEffect(() => {
     if(dietSet)
     {
@@ -34,14 +34,22 @@ useEffect(() => {
           }
         
         
-          alert("diet set, parseing meals");
         
           let whatsthis = parseMeals(dietString);
-          console.log(whatsthis);
+         
           setDays(whatsthis);
+
+          if(whatsthis.length == 0)
+            {
+             setError(true);
+            }
     }
 }, [dietSet, dietString]);
 
+useEffect(() => {
+    if(days2.length > 0)
+        setError(false);
+}, [days2]);
 
 /* const backgroundStyle = {
     backgroundImage: `url(${dietPic})`, // Replace with your image URL
@@ -72,13 +80,14 @@ const reload =() => {
 
     setIsLoading(false);
     setDietSet(false);
+    setCurrentDayIndex(0);
 }
 
 
 
  function createDiet2(dietType: string) {
     const headers  = {
-        'api-key' : "redacted"
+ 'api-key' : "redacted"
       }
     const params = new URLSearchParams();
 params.append('diet', dietType);
@@ -108,9 +117,13 @@ setIsLoading(true);
 }
     return(
 
-
+     
 
         <div >
+              {error && <div>
+                <Typography>The response was not in a format we could parse. Please try again</Typography>
+                <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Button</Button>
+                </div>}
         {isLoading && <CircularProgress/>
         }
 
@@ -142,11 +155,11 @@ setIsLoading(true);
 
 <div>
 <h2>{currentDay.day}</h2>
-<ul>
-  <li><strong>Breakfast:</strong> {currentDay.breakfast}</li>
-  <li><strong>Lunch:</strong> {currentDay.lunch}</li>
-  <li><strong>Dinner:</strong> {currentDay.dinner}</li>
-</ul>
+<div>
+  <div><strong>Breakfast:</strong> {currentDay.breakfast}</div>
+  <div><strong>Lunch:</strong> {currentDay.lunch}</div>
+  <div><strong>Dinner:</strong> {currentDay.dinner}</div>
+</div>
 </div>
 <div>
 <button onClick={handlePrevious} disabled={currentDayIndex === 0}>

@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ export default function Joke(){
     const [jokes, setJokes] = useState("");
     const [jokeSet, setJokeSet] = useState(false);
     const[jokeArray, setJokeArray] = useState<Joke[]>([]);
-
+    const [error, errorSet] = useState(false);
 
     /* const backgroundStyle = {
       backgroundImage: `url('https://ordinarygeeks.com/images/Joke.png')`, // Replace with your image URL
@@ -35,25 +35,54 @@ export default function Joke(){
           const lines = input.split("\n").filter((line) => line.trim() !== "");
         
           let currentType = ""; // To hold the current joke number/type
-        
+          let jokePunchLine : string[]=[];
           for (const line of lines) {
-            if (line.startsWith("Joke ")) { // Detect joke type
+            if (line.includes("Joke ")) { // Detect joke type
+              if(jokePunchLine.length > 0)
+              {
+                jokes.push({ type: currentType, text: jokePunchLine.join(" ") });
+                jokePunchLine = [];
+              }
               currentType = line.trim();
             } else if (currentType) { // Add text if it's a part of a joke
-              jokes.push({ type: currentType, text: line.trim() });
-              currentType = ""; // Reset for next joke
+              if(line.length > 2)
+              {
+                jokePunchLine.push(line.trim());
+              
+              //currentType = ""; // Reset for next joke
+              }
             }
           }
+
+          if(jokePunchLine.length > 0)
+            {
+              jokes.push({ type: currentType, text: jokePunchLine.join(" ") });
+              jokePunchLine = [];
+            }
         
           return jokes;
         };
-      setJokeArray(parseInput(jokes));
+      let jArray = (parseInput(jokes));
+      setJokeArray(jArray);
+      if(jArray.length == 0)
+      {
+       errorSet(true);
+      }
     }
     },[jokeSet, jokes])
+
+    useEffect(() => {
+
+      if(jokeArray.length > 0)
+        errorSet(false);
+    }, [jokeArray])
+
+
     const reload =() => {
 
         setIsLoading(false);
         setJokeSet(false);
+        setCurrentIndex(0);
     }
     const getAJoke=() => {
 
@@ -97,7 +126,10 @@ export default function Joke(){
 
         <div >
             
-            
+            {error && <div>
+                <Typography>The response was not in a format we could parse. Please try again</Typography>
+                <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Button</Button>
+                </div>}
 
                   {isLoading && <CircularProgress/>
                     }
@@ -112,10 +144,10 @@ export default function Joke(){
            <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>{jokeArray[currentIndex].type}</h1>
       <p>{jokeArray[currentIndex].text}</p>
-      <button onClick={showPreviousJoke} style={{ marginRight: "10px" }}>
+      <button onClick={showPreviousJoke} disabled={currentIndex === 0} style={{ marginRight: "10px" }}>
         Previous
       </button>
-      <button onClick={showNextJoke}>Next</button>
+      <button onClick={showNextJoke} disabled={currentIndex === jokeArray.length - 1}>Next</button>
     </div>
     </div>
 }

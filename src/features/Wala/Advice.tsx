@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,7 @@ export default function Advice(){
     const [adviceArray, setAdviceArray] = useState<Advice[]>([]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
-
+    const [error, errorSet] = useState(false);
     const showNextAdvice = () => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % advice.length); // Loop to the start
     };
@@ -47,15 +47,29 @@ export default function Advice(){
 
     }
 
+    let parsedInput = parseInput(advice);
     setAdviceArray(parseInput(advice));
+
+    if(parsedInput.length == 0)
+        {
+         errorSet(true);
+         
+        }
 }
       },[adviceSet, advice]
 
     )
+
+    useEffect(() => {
+        if(adviceArray.length > 0)
+            errorSet(false);
+    },[adviceArray]
+);
     const reload =() => {
 
         setIsLoading(false);
         setAdviceSet(false);
+        setCurrentIndex(0);
     }
 /*     const backgroundStyle = {
         backgroundImage: `url('https://ordinarygeeks.com/images/Counseling.png')`, // Replace with your image URL
@@ -95,7 +109,11 @@ export default function Advice(){
 
         <div >
             
-            
+            {error && <div>
+                <Typography>The response was not in a format we could parse. Please try again</Typography>
+                <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Button</Button>
+                </div>}
+                
 
                   {isLoading && <CircularProgress/>
                     }
@@ -110,10 +128,10 @@ export default function Advice(){
         <div style={{ textAlign: "center", margin: "20px" }}>
       <h1>{adviceArray[currentIndex].type}</h1>
       <p>{adviceArray[currentIndex].text}</p>
-      <button onClick={showPreviousAdvice} style={{ marginRight: "10px" }}>
+      <button onClick={showPreviousAdvice} disabled={currentIndex === 0} style={{ marginRight: "10px" }}>
         Previous
       </button>
-      <button onClick={showNextAdvice}>Next</button>
+      <button onClick={showNextAdvice} disabled={currentIndex === adviceArray.length - 1}>Next</button>
       </div>
     </div>
 

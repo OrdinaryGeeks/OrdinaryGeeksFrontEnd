@@ -11,10 +11,11 @@ export default function WorkoutContext() {
     const [enduranceChecked, setEnduranceChecked] = useState(false)
     const [workout, setWorkout] = useState("");
     const [workoutSet, setWorkoutSet] = useState(false);
+    const [error, errorSet] = useState(false);
     
     const [isLoading, setIsLoading] = useState(false);
     const [days, setDays] = useState<{ day: string; workoutType: string; exercises: string[] }[]>([]);
-
+    const [intro, setIntro] = useState("");
 
     /* const backgroundStyle = {
         backgroundImage: `url('https://ordinarygeeks.com/images/Workout.png')`, // Replace with your image URL
@@ -32,15 +33,22 @@ export default function WorkoutContext() {
             
             const dayBlocks = input.split(/Day \d+:/g).filter(block => block.trim() !== ""); // Split by "Day" keyword
             dayBlocks.forEach((block, index) => {
+                if(index == 0)
+                {
+                    setIntro(block);
+                }
+                if(index  > 0)
+                {
               const lines = block.trim().split("\n");
               const workoutType = lines[0].trim(); // First line is the workout type
               const exercises = lines.slice(1).map(line => line.trim()); // Remaining lines are exercises
               
               workoutPlan.push({
-                day: `Day ${index + 1}`,
+                day: `Day ${index }`,
                 workoutType,
                 exercises,
               });
+            }
             });
           
             return workoutPlan;
@@ -49,10 +57,22 @@ export default function WorkoutContext() {
           // Call the function and store workout plan
           const workoutPlan = parseWorkoutPlan(workout);
 
-          console.log(workoutPlan);
+
+          
           setDays(workoutPlan);
+
+          if(workoutPlan.length == 0)
+            {
+             
+                errorSet(true);
+            }
         }
     }, [workoutSet, workout])
+
+    useEffect(() => {
+    if(days.length > 0)
+        errorSet(false);
+},[days])
 
 
     const [currentDayIndex, setCurrentDayIndex] = useState(0); // Track the current day's index
@@ -74,6 +94,8 @@ export default function WorkoutContext() {
 
         setIsLoading(false);
         setWorkoutSet(false);
+        setCurrentDayIndex(0);
+        setIntro("");
     }
     const handleWeight = (event: any) => {
         setWeightChecked(event.target.checked);
@@ -173,12 +195,17 @@ export default function WorkoutContext() {
       
     return(
         <div >
+
+{error && <div>
+                <Typography>The response was not in a format we could parse. Please try again</Typography>
+                <Button sx= {{m:2}} variant="contained" onClick={reload}>Reload Button</Button>
+                </div>}
         {isLoading && <CircularProgress/>}
         {!isLoading && !workoutSet &&
         <>
         <>
         <FormControl fullWidth>
-      <Typography id="demo-simple-select-label">How often do you want to workout a week 3,4,5</Typography>
+      <Typography id="demo-simple-select-label">How often do you want to workout a week?</Typography>
         <Select
            labelId="select-workout-frequency"
            id="select-workout-frequency"
@@ -233,19 +260,20 @@ name="fitness-level">
 
 {workoutSet && currentDay &&
 <div>
-    
+    {intro && <div>{intro}</div>
+    }
         <h2>{currentDay.day}: {currentDay.workoutType}</h2>
-        <ul>
+        <div>
           {currentDay.exercises.map((exercise, index) => (
-            <li key={index}>{exercise}</li>
+            <div key={index}>{exercise}</div>
           ))}
-        </ul>
+        </div>
       
       <div>
         <button onClick={handlePrevious} disabled={currentDayIndex === 0}>
           Previous
         </button>
-        <button onClick={handleNext} disabled={currentDayIndex === days.length - 1}>
+        <button onClick={handleNext}  disabled={currentDayIndex === days.length - 1} >
           Next
         </button>
       </div>
